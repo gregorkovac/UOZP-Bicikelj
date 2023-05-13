@@ -47,7 +47,16 @@ for c in classes:
     for i in range(0, len(bikesMinus120)):
         bikesMinus120[i] = train[train["timestamp"] == bikesMinus120[i]][c].values[0]
 
+
     X = np.column_stack((X, bikesMinus60, bikesMinus90, bikesMinus120))
+    X = np.asarray(X, dtype=np.float64)
+    X = X / X.max(axis=0)
+
+    
+
+    # for i in range(0, len(X[0])):
+    #     X[:, i] = float(X[:, i])
+    #     X[:,i] = X[:,i] / X[:,i].max()
 
     #model = AdaBoostClassifier(n_estimators=100, learning_rate=1)
     #model = RandomForestClassifier(n_estimators=100)
@@ -77,12 +86,8 @@ for c in classes:
         #print(row, bikesMinus60, bikesMinus90, bikesMinus120)
 
         X_test = np.column_stack((row[0], row[1], row[2], bikesMinus60, bikesMinus90, bikesMinus120))
-
-        # month = int(str(timestamp)[5:7])
-        # day = int(str(timestamp)[8:10])
-        # Hour = int(str(timestamp)[11:13])
-
-        # X_test = np.column_stack((month, day, Hour))
+        X_test = np.asarray(X_test, dtype=np.float64)
+        X_test = X_test / X_test.max(axis=0)
 
         y_pred = model.predict(X_test)
 
