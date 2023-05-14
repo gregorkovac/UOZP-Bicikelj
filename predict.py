@@ -63,11 +63,11 @@ for c in classes:
     for i in range(0, len(bikesMinus60)):
         bikesMinus60[i] = train[train["timestamp"] == bikesMinus60[i]][c].values[0]
     
-    for i in range(0, len(bikesMinus90)):
-        bikesMinus90[i] = train[train["timestamp"] == bikesMinus90[i]][c].values[0]
+    # for i in range(0, len(bikesMinus90)):
+    #     bikesMinus90[i] = train[train["timestamp"] == bikesMinus90[i]][c].values[0]
 
-    for i in range(0, len(bikesMinus120)):
-        bikesMinus120[i] = train[train["timestamp"] == bikesMinus120[i]][c].values[0]
+    # for i in range(0, len(bikesMinus120)):
+    #     bikesMinus120[i] = train[train["timestamp"] == bikesMinus120[i]][c].values[0]
 
     holiday_data = []
     school_holiday_data = []
@@ -87,7 +87,7 @@ for c in classes:
             school_holiday_data.append(0)
             
 
-    X = np.column_stack((X, bikesMinus60, bikesMinus90, bikesMinus120, holiday_data, school_holiday_data))
+    X = np.column_stack((X, bikesMinus60, holiday_data, school_holiday_data))
 
     # print(np.shape(X))
 
@@ -135,8 +135,8 @@ for c in classes:
         row = test.iloc[t, 1:4].values
 
         bikesMinus60i = copy.deepcopy(test["bikesMinus60"]).values[t]
-        bikesMinus90i = copy.deepcopy(test["bikesMinus90"]).values[t]
-        bikesMinus120i = copy.deepcopy(test["bikesMinus120"]).values[t]
+        # bikesMinus90i = copy.deepcopy(test["bikesMinus90"]).values[t]
+        # bikesMinus120i = copy.deepcopy(test["bikesMinus120"]).values[t]
 
         bikesMinus60 = train[train["timestamp"] == bikesMinus60i][c].values
         bikesMinus90 = train[train["timestamp"] == bikesMinus90i][c].values

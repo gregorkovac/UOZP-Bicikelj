@@ -3,14 +3,15 @@ import numpy as np
 from datetime import datetime
 import copy
 
-test = pd.read_csv('bicikelj_out_11_5_11_30.csv')
+test = pd.read_csv('bicikelj_out_13_5_15_6.csv')
 
-test = test.drop('month', axis=1)
-test = test.drop('day', axis=1)
-test = test.drop('hour', axis=1)
-test = test.drop('bikesMinus60', axis=1)
+#test = test.drop('month', axis=1)
+#test = test.drop('day', axis=1)
+#test = test.drop('hour', axis=1)
+#test = test.drop('bikesMinus60', axis=1)
 test = test.drop('bikesMinus90', axis=1)
 test = test.drop('bikesMinus120', axis=1)
+#test = test.drop('holidays', axis=1)
 
 now = datetime.now()
 
