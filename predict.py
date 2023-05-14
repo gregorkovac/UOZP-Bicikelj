@@ -63,23 +63,23 @@ for c in classes:
     for i in range(0, len(bikesMinus60)):
         bikesMinus60[i] = train[train["timestamp"] == bikesMinus60[i]][c].values[0]
     
-    # for i in range(0, len(bikesMinus90)):
-    #     bikesMinus90[i] = train[train["timestamp"] == bikesMinus90[i]][c].values[0]
+    for i in range(0, len(bikesMinus90)):
+        bikesMinus90[i] = train[train["timestamp"] == bikesMinus90[i]][c].values[0]
 
-    # for i in range(0, len(bikesMinus120)):
-    #     bikesMinus120[i] = train[train["timestamp"] == bikesMinus120[i]][c].values[0]
+    for i in range(0, len(bikesMinus120)):
+        bikesMinus120[i] = train[train["timestamp"] == bikesMinus120[i]][c].values[0]
 
-    holiday_data = []
+    #holiday_data = []
     school_holiday_data = []
     for t in train["timestamp"]:
         day = pd.to_datetime(t).day
         month = pd.to_datetime(t).month
         date = [day, month]
 
-        if date in holidays:
-            holiday_data.append(1)
-        else:
-            holiday_data.append(0)
+        # if date in holidays:
+        #     holiday_data.append(1)
+        # else:
+        #     holiday_data.append(0)
 
         if date in school_holidays or (month == 6 and day >= 26) or month == 7 or month == 8:
             school_holiday_data.append(1)
@@ -87,7 +87,7 @@ for c in classes:
             school_holiday_data.append(0)
             
 
-    X = np.column_stack((X, bikesMinus60, holiday_data, school_holiday_data))
+    X = np.column_stack((X, bikesMinus60, bikesMinus90, bikesMinus120, school_holiday_data))
 
     # print(np.shape(X))
 
@@ -111,8 +111,6 @@ for c in classes:
     # maxes = X.max(axis=0)
     # X = X / maxes
 
-    
-
     # for i in range(0, len(X[0])):
     #     X[:, i] = float(X[:, i])
     #     X[:,i] = X[:,i] / X[:,i].max()
@@ -133,10 +131,11 @@ for c in classes:
         #print(timestamp)
 
         row = test.iloc[t, 1:4].values
+        #print(row)
 
         bikesMinus60i = copy.deepcopy(test["bikesMinus60"]).values[t]
-        # bikesMinus90i = copy.deepcopy(test["bikesMinus90"]).values[t]
-        # bikesMinus120i = copy.deepcopy(test["bikesMinus120"]).values[t]
+        bikesMinus90i = copy.deepcopy(test["bikesMinus90"]).values[t]
+        bikesMinus120i = copy.deepcopy(test["bikesMinus120"]).values[t]
 
         bikesMinus60 = train[train["timestamp"] == bikesMinus60i][c].values
         bikesMinus90 = train[train["timestamp"] == bikesMinus90i][c].values
@@ -150,17 +149,12 @@ for c in classes:
         month = pd.to_datetime(timestamp).month
         date = [day, month]
 
-        if date in holidays:
-            holiday_data = 1
-        else:
-            holiday_data = 0
-
         if date in school_holidays or (month == 6 and day >= 26) or month == 7 or month == 8:
             school_holiday_data = 1
         else:
             school_holiday_data = 0
 
-        X_test = np.column_stack((row[0], row[1], row[2], bikesMinus60, bikesMinus90, bikesMinus120, holiday_data, school_holiday_data))
+        X_test = np.column_stack((row[0], row[1], row[2], bikesMinus60, bikesMinus90, bikesMinus120, school_holiday_data))
         X_test = np.asarray(X_test, dtype=np.float64)
 
         # X_test = X_test / maxes

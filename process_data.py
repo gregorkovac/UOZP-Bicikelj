@@ -1,38 +1,72 @@
 import pandas as pd
 import numpy as np
-import datetime
+from datetime import datetime
 
 test_dataset = pd.read_csv('bicikelj_test.csv')
 train_dataset = pd.read_csv('bicikelj_train.csv')
 
-#test = pd.read_csv('bicikelj_test.csv')
-features = test_dataset.columns
+# Join datasets
+dataset = pd.concat([train_dataset, test_dataset])
+
+# Sort by timestamp
+dataset = dataset.sort_values(by=['timestamp'])
+
+features = dataset.columns
 classes = features[1:(len(features))]
 
-test_timestamps = [pd.to_datetime(t) for t in test_dataset['timestamp'].values]
-train_timestamps = [pd.to_datetime(t) for t in train_dataset['timestamp'].values]
-
-all_timestamps = test_timestamps + train_timestamps
-#timestamps = np.array(timestamps)
+timestamps = [pd.to_datetime(t) for t in dataset['timestamp'].values]
 
 new_data = []
 
+holidays = [
+    [8, 2],
+    [18, 4],
+    [27, 4],
+    [2, 5],
+    [15, 8],
+    [31, 10],
+    [1, 11],
+]
+
+school_holidays = [
+    [27, 4],
+    [28, 4],
+    [29, 4],
+    [30, 4],
+    [1, 5],
+    [2, 5]
+]
+
 cnt = 0
-for t in train_timestamps:
+for t in timestamps:
     cnt += 1
-    print(cnt, " / ", len(test_timestamps))
+    print(cnt, " / ", len(timestamps))
 
     month = t.month
     day = t.day
     hour = t.hour
 
-    bikesMinus60 = str(min(all_timestamps, key=lambda x: abs(x - (t - datetime.timedelta(minutes=60)))))
-    bikesMinus90 = str(min(all_timestamps, key=lambda x: abs(x - (t - datetime.timedelta(minutes=90)))))
-    bikesMinus120 = str(min(all_timestamps, key=lambda x: abs(x - (t - datetime.timedelta(minutes=120)))))
+    bikesMinus60 = str(min(timestamps, key=lambda x: abs(x - (t - pd.Timedelta(minutes=60)))))
+    bikesMinus90 = str(min(timestamps, key=lambda x: abs(x - (t - pd.Timedelta(minutes=90)))))
+    bikesMinus120 = str(min(timestamps, key=lambda x: abs(x - (t - pd.Timedelta(minutes=120)))))
 
-    row = [str(t), month, day, hour, bikesMinus60, bikesMinus90, bikesMinus120]
+    date = [day, month]
 
-    c = test_dataset[test_dataset['timestamp'] == str(t)][classes].values[0]
+    if date in holidays:
+        holiday_data = 1
+    else:
+        holiday_data = 0
+
+    if date in school_holidays or (month == 6 and day >= 26) or month == 7 or month == 8:
+        school_holiday_data = 1
+    else:
+        school_holiday_data = 0
+
+    day_of_week = t.weekday()
+
+    row = [str(t), month, day, hour, bikesMinus60, bikesMinus90, bikesMinus120, holiday_data, school_holiday_data, day_of_week]
+
+    c = dataset[dataset['timestamp'] == str(t)][classes].values[0]
 
     for i in range(0, len(c)):
         row.append(c[i])
@@ -46,12 +80,12 @@ for t in train_timestamps:
 
     new_data.append(row)
 
-# TODO: Normalize data
-
 # Save new data to csv
 new_data = pd.DataFrame(new_data)
 
 # Rename columns
-new_data.columns = ['timestamp', 'month', 'day', 'hour', 'bikesMinus60', 'bikesMinus90', 'bikesMinus120'] + classes.tolist()
+new_data.columns = ['timestamp', 'month', 'day', 'hour', 'bikesMinus60', 'bikesMinus90', 'bikesMinus120', 'holidayData', 'schoolHolidayData', 'dayOfWeek'] + classes.tolist()
 
-new_data.to_csv('bicikelj_test_processed.csv', index=False)
+now = datetime.now()
+
+new_data.to_csv('bicikelj_processed_' + str(now.day) + "_" + str(now.month) + "_"  + str(now.hour) + "_" + str(now.minute) + ".csv", index=False)
