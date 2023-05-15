@@ -56,6 +56,11 @@ for c in classes:
 
     X = train[train.columns[1:4]]
 
+    X = X.drop('day', axis=1)
+
+    # print(X)
+    # exit(0)
+
     bikesMinus60 = copy.deepcopy(train["bikesMinus60"]).values
     bikesMinus90 = copy.deepcopy(train["bikesMinus90"]).values
     bikesMinus120 = copy.deepcopy(train["bikesMinus120"]).values
@@ -69,12 +74,17 @@ for c in classes:
     for i in range(0, len(bikesMinus120)):
         bikesMinus120[i] = train[train["timestamp"] == bikesMinus120[i]][c].values[0]
 
+    day_of_week = []
+
     #holiday_data = []
     school_holiday_data = []
     for t in train["timestamp"]:
-        day = pd.to_datetime(t).day
-        month = pd.to_datetime(t).month
+        date_time = pd.to_datetime(t)
+        day = date_time.day
+        month = date_time.month
         date = [day, month]
+
+        day_of_week.append(date_time.weekday())
 
         # if date in holidays:
         #     holiday_data.append(1)
@@ -87,7 +97,7 @@ for c in classes:
             school_holiday_data.append(0)
             
 
-    X = np.column_stack((X, bikesMinus60, bikesMinus90, bikesMinus120, school_holiday_data))
+    X = np.column_stack((X, bikesMinus60, bikesMinus90, bikesMinus120, school_holiday_data, day_of_week))
 
     # print(np.shape(X))
 
@@ -118,7 +128,7 @@ for c in classes:
     #model = AdaBoostClassifier(n_estimators=100, learning_rate=1)
     #model = RandomForestClassifier(n_estimators=100)
     model = linear_model.LinearRegression()
-    # model = linear_model.Ridge(alpha=0.5)
+    #model = linear_model.Ridge(alpha=0.5)
 
     # Fit the model.
     model.fit(X, y)
@@ -145,8 +155,10 @@ for c in classes:
         bikesMinus90 = bikesMinus90[0] if len(bikesMinus90) > 0 else test[test["timestamp"] == bikesMinus90i][c].values[0]
         bikesMinus120 = bikesMinus120[0] if len(bikesMinus120) > 0 else test[test["timestamp"] == bikesMinus120i][c].values[0]
 
-        day = pd.to_datetime(timestamp).day
-        month = pd.to_datetime(timestamp).month
+        date_time = pd.to_datetime(timestamp)
+
+        day = date_time.day
+        month = date_time.month
         date = [day, month]
 
         if date in school_holidays or (month == 6 and day >= 26) or month == 7 or month == 8:
@@ -154,7 +166,9 @@ for c in classes:
         else:
             school_holiday_data = 0
 
-        X_test = np.column_stack((row[0], row[1], row[2], bikesMinus60, bikesMinus90, bikesMinus120, school_holiday_data))
+        day_of_week = date_time.weekday()
+
+        X_test = np.column_stack((row[0], row[1], row[2], bikesMinus60, bikesMinus90, bikesMinus120, school_holiday_data, day_of_week))
         X_test = np.asarray(X_test, dtype=np.float64)
 
         # X_test = X_test / maxes
